@@ -41,21 +41,6 @@ function ProjectSheet({ p }: { p: Project }) {
         ))}
       </ul>
 
-      <h3>My role</h3>
-      <p className="meta">{p.role.title}</p>
-      <ul className="points">
-        {p.role.points.map((r) => (
-          <li key={r}>{r}</li>
-        ))}
-      </ul>
-
-      <h3>How it works</h3>
-      <ol className="steps">
-        {p.steps.map((s) => (
-          <li key={s}>{s}</li>
-        ))}
-      </ol>
-
       <h3>Screens</h3>
       <div className="shots">
         {p.shots.map((s) => (

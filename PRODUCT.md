@@ -36,7 +36,7 @@ The candidate is a bilingual Filipino–English CS student who did the full data
 ## Capabilities and Constraints
 
 - Site sections are Projects, Experience, Skills and Contact only. It showcases projects; it is not a copy of the CV (no education, certifications or summary-of-qualifications content).
-- Each project shows only: a plain one-paragraph summary, stack, the candidate's role, how it works in plain non-technical steps, app screenshots, and team credit. No benchmark tables or metrics on the project sheet.
+- Each project shows only: a plain one-paragraph summary, stack, app screenshots, and team credit. No role or how-it-works sections. No benchmark tables or metrics on the project sheet.
 - Project screenshots live in public/projects/<id>/, copied unedited from the project's own deck or app.
 
 - All content comes from one data file built from the CV and, later, the project repositories.
