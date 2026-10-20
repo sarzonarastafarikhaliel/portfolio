@@ -1,0 +1,7 @@
+node_modules
+dist
+.vercel
+# Source material for the portfolio, not part of the site. Contains a database dump with account data.
+/Projects/
+/Laredo/
+/.impeccable/

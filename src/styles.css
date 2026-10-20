@@ -1,0 +1,557 @@
+:root {
+  --felt: #9a9a94;
+  --desk: #4a4f55;
+  --alu: #d9dcdf;
+  --kraft: #c8a77a;
+  --ink: #1d2024;
+  --ink-kraft: #4a3d2c;
+  --tape: #17191c;
+  --tape-ink: #eeeeea;
+  --teal: #1f8a8a;
+  --gutter: clamp(1rem, 4.5vw, 4.5rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--felt);
+  color: var(--ink);
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 100%;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  scrollbar-color: var(--desk) var(--felt);
+  caret-color: var(--teal);
+}
+
+body {
+  margin: 0;
+  background: var(--felt);
+}
+
+::selection {
+  background: var(--teal);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Soft falloff at the frame edges, like a desk lit from one window. */
+.scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 40% 45%, transparent 55%, rgb(28 30 33 / 0.32));
+}
+
+/* ---------- Bar and stop rail ---------- */
+
+.bar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.1rem var(--gutter) 1.75rem;
+  pointer-events: none;
+  /* Felt-toned shade so sheets scrolling underneath never collide with the bar. */
+  background: linear-gradient(to bottom, rgb(163 163 158 / 0.97) 58%, rgb(163 163 158 / 0));
+}
+
+.bar > * {
+  pointer-events: auto;
+}
+
+.mark {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.rail,
+.bar-actions {
+  display: flex;
+  gap: 0.375rem;
+}
+
+/* Label tape: the one control vocabulary. Inactive is dark tape; current is inverted aluminium tape. */
+.stop,
+.link,
+.tags li {
+  font: 600 0.75rem/1 'Bricolage Grotesque', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--tape-ink);
+  background: var(--tape);
+  border: 0;
+  border-radius: 3px;
+  padding: 0.5rem 0.65rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
+  cursor: pointer;
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background-color 0.25s var(--ease-out);
+}
+
+.stop-n {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.stop:hover,
+.link:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 4px 10px rgb(0 0 0 / 0.3);
+}
+
+.stop[aria-current='true'] {
+  background: var(--alu);
+  color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), 0 5px 12px rgb(0 0 0 / 0.28);
+}
+
+/* ---------- Sections ---------- */
+
+.stop-section {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 36rem);
+  align-items: center;
+  padding: 6.5rem var(--gutter) 12vh;
+  pointer-events: none;
+}
+
+.sheet,
+.hero-copy {
+  pointer-events: auto;
+}
+
+/* Hero: set straight on the felt, top-left, where the desk is empty. */
+.hero {
+  grid-template-columns: minmax(0, 36rem) 1fr;
+  align-items: start;
+  padding-top: max(7.5rem, 16vh);
+}
+
+h1 {
+  font-size: clamp(2.75rem, 5.6vw, 5.5rem);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+}
+
+.roles {
+  margin-top: 1.25rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.lede {
+  margin-top: 0.75rem;
+  max-width: 44ch;
+}
+
+.figures {
+  padding: 0 0 0 1.1rem;
+  margin: 1.25rem 0 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--tape-ink);
+  background: var(--tape);
+  border-radius: 3px;
+  padding: 0.85rem 1.2rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 2px 4px rgb(0 0 0 / 0.25);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 16px rgb(0 0 0 / 0.28);
+}
+
+.btn-quiet {
+  background: none;
+  color: var(--ink);
+  box-shadow: none;
+  padding-inline: 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.btn-quiet:hover {
+  box-shadow: none;
+  text-decoration-color: var(--teal);
+}
+
+.hint {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #2c3034;
+}
+
+/* Kraft sheet laid on the felt. */
+.sheet + .sheet {
+  margin-top: 4rem;
+}
+
+.sheet {
+  grid-column: 2;
+  background-color: var(--kraft);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .12 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  border-radius: 2px;
+  padding: clamp(1.5rem, 3vw, 2.75rem);
+  box-shadow: 0 1px 1px rgb(30 24 16 / 0.2), 0 14px 30px -10px rgb(20 22 25 / 0.5);
+}
+
+.sheet h2 {
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.sheet h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.sub {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.meta {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  color: var(--ink-kraft);
+}
+
+.points {
+  margin: 1.25rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.points li + li {
+  margin-top: 0.6rem;
+}
+
+.points li::marker {
+  color: var(--ink-kraft);
+}
+
+.entry + .entry,
+.certs-h {
+  margin-top: 2rem;
+}
+
+.sheet h2 + .entry {
+  margin-top: 1.5rem;
+}
+
+.tags {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+}
+
+.tags li {
+  cursor: default;
+  font-size: 0.6875rem;
+  padding: 0.4rem 0.55rem;
+}
+
+/* Project case study on the sheet. */
+.project .summary {
+  margin-top: 1.25rem;
+  font-size: 1.0625rem;
+}
+
+.project h3 {
+  margin-top: 2.25rem;
+}
+
+.steps {
+  margin: 0.9rem 0 0;
+  padding-left: 1.4rem;
+}
+
+.steps li + li {
+  margin-top: 0.6rem;
+}
+
+.steps li::marker {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-kraft);
+}
+
+/* App screenshots, printed and laid on the kraft sheet. */
+.shots {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.shots figure {
+  margin: 0;
+}
+
+.shots a {
+  display: block;
+  border-radius: 2px;
+}
+
+.shots img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f2f2f2;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgb(74 61 44 / 0.25), 0 6px 14px -6px rgb(30 24 16 / 0.45);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+
+.shots a:hover img {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgb(74 61 44 / 0.3), 0 12px 22px -8px rgb(30 24 16 / 0.5);
+}
+
+.shots .portrait {
+  max-width: 15rem;
+}
+
+.project-link {
+  margin-top: 2rem;
+}
+
+.shots figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ink-kraft);
+}
+
+.project .tags {
+  margin-top: 0.75rem;
+}
+
+.project .meta {
+  margin-top: 0.6rem;
+}
+
+.team {
+  margin-top: 1.25rem;
+}
+
+.skills {
+  margin: 1.5rem 0 0;
+}
+
+.skills div + div {
+  margin-top: 1.1rem;
+}
+
+.skills dt {
+  font-weight: 600;
+}
+
+.skills dd {
+  margin: 0.15rem 0 0;
+}
+
+.contact {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 2rem;
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  font-weight: 600;
+}
+
+.contact li + li {
+  margin-top: 0.4rem;
+}
+
+.contact a:hover {
+  text-decoration-color: var(--teal);
+  text-decoration-thickness: 2px;
+}
+
+.sheet > p:not(.sub, .meta) {
+  margin-top: 1rem;
+}
+
+/* Desk view: figures live on the label tapes in the scene; keep them for screen readers. */
+html:not(.simple) .figures {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* The sheet settles onto the felt as it scrolls in. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not(.simple) .sheet {
+      animation: lay-down linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 85%;
+    }
+  }
+}
+
+@keyframes lay-down {
+  from {
+    transform: translateY(4rem) rotate(-2.2deg) scale(1.015);
+    box-shadow: 0 1px 1px rgb(30 24 16 / 0.1), 0 40px 60px -16px rgb(20 22 25 / 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
+/* ---------- Portrait / phones ---------- */
+
+@media (max-width: 760px), (orientation: portrait) and (max-width: 1024px) {
+  /* Jump navigation stays on phones: a scrollable strip of tapes along the bottom edge. */
+  .rail {
+    position: fixed;
+    inset: auto 0 0;
+    padding: 0.75rem var(--gutter) max(0.75rem, env(safe-area-inset-bottom));
+    overflow-x: auto;
+    scrollbar-width: none;
+    background: var(--felt);
+    box-shadow: 0 -1px 0 rgb(29 32 36 / 0.12), 0 -8px 18px -10px rgb(29 32 36 / 0.35);
+  }
+
+  .stop {
+    flex: none;
+  }
+
+  .hint {
+    display: none;
+  }
+
+  /* The desk sits below the copy here, so the figures are shown as text too. */
+  html:not(.simple) .figures {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .stop-section {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    padding-top: 56svh;
+    padding-bottom: 12svh;
+  }
+
+  .sheet {
+    grid-column: 1;
+  }
+
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 5.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 11vw, 4rem);
+  }
+}
+
+/* ---------- Simple view: the same content as a plain document ---------- */
+
+html.simple .rail {
+  display: none;
+}
+
+html.simple .stop-section {
+  min-height: 0;
+  display: block;
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem var(--gutter);
+}
+
+html.simple .hero {
+  padding-top: 6rem;
+  padding-bottom: 2.5rem;
+}
+
+html.simple .hint {
+  display: none;
+}
+
+html.simple main {
+  padding-bottom: 4rem;
+}
