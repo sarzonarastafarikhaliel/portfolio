@@ -577,31 +577,20 @@ function useThinkerVoxels(size: number) {
   }, [size])
 }
 
-function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
-  const size = 0.0026
-  const voxels = useThinkerVoxels(size)
+// One instanced cube per cell. Each cube flies in from a random direction after its delay, then settles.
+type Cell = { x: number; y: number; z: number; color: THREE.Color; delay: number }
+
+function VoxelModel({ cells, size, m, reducedMotion }: { cells: Cell[]; size: number; m: Mats; reducedMotion: boolean }) {
   const ref = useRef<THREE.InstancedMesh>(null)
   const start = useRef<number | null>(null)
   const done = useRef(false)
-
-  // Per-cube colour: teal low on the body fading to aluminium at the head, with a little noise.
-  const anim = useMemo(() => {
-    const teal = new THREE.Color(C.teal)
-    const pale = new THREE.Color('#c9dcdb')
-    const c = new THREE.Color()
-    return voxels.map((v) => {
-      const t = Math.min(1, v.y / 0.15 + (Math.random() - 0.5) * 0.35)
-      c.copy(teal).lerp(pale, t)
-      const dir = new THREE.Vector3(Math.random() - 0.5, 0.6 + Math.random(), Math.random() - 0.5).normalize()
-      return { color: c.clone(), dir, delay: (v.y / 0.15) * 1.6 + Math.random() * 0.35 }
-    })
-  }, [voxels])
+  const dirs = useMemo(() => cells.map(() => new THREE.Vector3(Math.random() - 0.5, 0.6 + Math.random(), Math.random() - 0.5).normalize()), [cells])
 
   useLayoutEffect(() => {
     const mesh = ref.current!
-    voxels.forEach((_, i) => mesh.setColorAt(i, anim[i].color))
+    cells.forEach((v, i) => mesh.setColorAt(i, v.color))
     mesh.instanceColor!.needsUpdate = true
-  }, [voxels, anim])
+  }, [cells])
 
   const o = useMemo(() => new THREE.Object3D(), [])
   useFrame(({ clock }) => {
@@ -610,12 +599,12 @@ function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
     if (start.current === null) start.current = clock.elapsedTime
     const t = reducedMotion ? 99 : clock.elapsedTime - start.current
     let settled = true
-    voxels.forEach((v, i) => {
-      const k = Math.min(1, Math.max(0, (t - anim[i].delay) / 0.7))
+    cells.forEach((v, i) => {
+      const k = Math.min(1, Math.max(0, (t - v.delay) / 0.7))
       const e = 1 - Math.pow(1 - k, 3)
       if (k < 1) settled = false
       const fly = (1 - e) * 0.09
-      o.position.set(v.x + anim[i].dir.x * fly, v.y + anim[i].dir.y * fly, v.z + anim[i].dir.z * fly)
+      o.position.set(v.x + dirs[i].x * fly, v.y + dirs[i].y * fly, v.z + dirs[i].z * fly)
       o.scale.setScalar(Math.max(0.0001, e) * size * 0.9)
       o.updateMatrix()
       mesh.setMatrixAt(i, o.matrix)
@@ -623,6 +612,27 @@ function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
     mesh.instanceMatrix.needsUpdate = true
     if (settled) done.current = true
   })
+
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, cells.length]} material={m.voxel} castShadow receiveShadow frustumCulled={false}>
+      <boxGeometry args={[1, 1, 1]} />
+    </instancedMesh>
+  )
+}
+
+function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
+  const size = 0.0026
+  const voxels = useThinkerVoxels(size)
+
+  // Per-cube colour: teal low on the body fading to aluminium at the head, with a little noise.
+  const cells = useMemo(() => {
+    const teal = new THREE.Color(C.teal)
+    const pale = new THREE.Color('#c9dcdb')
+    return voxels.map((v) => {
+      const t = Math.min(1, v.y / 0.15 + (Math.random() - 0.5) * 0.35)
+      return { ...v, color: teal.clone().lerp(pale, t), delay: (v.y / 0.15) * 1.6 + Math.random() * 0.35 }
+    })
+  }, [voxels])
 
   const rock = useMemo(() => {
     // Low-poly stone: a few jittered icosahedra, flat shaded.
@@ -648,11 +658,122 @@ function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
       {/* One stone with a lower step in front for the feet. */}
       <mesh geometry={rock[0]} material={m.stone} position={[0, 0.03, 0.006]} scale={[0.04, 0.038, 0.038]} castShadow receiveShadow />
       <mesh geometry={rock[1]} material={m.stone} position={[0.002, 0.012, 0.046]} scale={[0.046, 0.02, 0.036]} castShadow receiveShadow />
-      <instancedMesh ref={ref} args={[undefined, undefined, voxels.length]} material={m.voxel} castShadow receiveShadow frustumCulled={false}>
-        <boxGeometry args={[1, 1, 1]} />
-      </instancedMesh>
+      <VoxelModel cells={cells} size={size} m={m} reducedMotion={reducedMotion} />
     </group>
   )
+}
+
+// A 1:23 Porsche 911 GT3 RS in GT Silver, voxelised like the Thinker. The body is a side profile
+// (roof line) swept across a plan width, with a narrower cabin above the belt line, cut-out arches,
+// wheels, and the swan-neck wing. Only surface cells are kept. Front is +x, units are metres.
+const CAR_ROOF: [number, number][] = [
+  [-0.104, 0.03], [-0.092, 0.037], [-0.03, 0.056], [0.0, 0.058], [0.034, 0.038], [0.09, 0.031], [0.104, 0.021],
+]
+const CAR = { hw: 0.0415, belt: 0.036, r: 0.0155, wheels: [0.064, -0.062] }
+
+function carRoof(x: number) {
+  for (let i = 1; i < CAR_ROOF.length; i++) {
+    const [x1, y1] = CAR_ROOF[i]
+    if (x <= x1) {
+      const [x0, y0] = CAR_ROOF[i - 1]
+      return y0 + ((x - x0) / (x1 - x0)) * (y1 - y0)
+    }
+  }
+  return 0
+}
+
+// Plan half-width: rounded front corners, squarer tail.
+function carWidth(x: number) {
+  const k = x > 0 ? Math.max(0, (x - 0.066) / 0.04) : Math.max(0, (-x - 0.08) / 0.026)
+  return k >= 1 ? 0 : CAR.hw * Math.sqrt(1 - k * k)
+}
+
+type Part = 'body' | 'glass' | 'light' | 'dark' | 'tyre' | 'rim' | 'caliper'
+
+function carPart(x: number, y: number, z: number): Part | null {
+  const az = Math.abs(z)
+  const w = carWidth(x)
+  // Wheels: tyre, rim face, and a teal caliper seen through the spokes at the top front.
+  for (const wx of CAR.wheels) {
+    const d = Math.hypot(x - wx, y - CAR.r)
+    if (d < CAR.r && az > CAR.hw - 0.012 && az < CAR.hw - 0.0005) {
+      if (d > CAR.r * 0.64) return 'tyre'
+      const a = Math.atan2(y - CAR.r, x - wx)
+      if (d > CAR.r * 0.3 && a > 0.3 && a < 1.8) return 'caliper'
+      return 'rim'
+    }
+  }
+  // Swan-neck wing: plane, end plates, and two stands rising from the engine lid.
+  if (x > -0.102 && x < -0.077 && y > 0.058 && y < 0.0625 && az < 0.0395) return 'dark'
+  if (x > -0.103 && x < -0.076 && y > 0.05 && y < 0.066 && az > 0.0355 && az < 0.0395) return 'dark'
+  if (x > -0.095 && x < -0.0885 && y > carRoof(x) - 0.003 && y < 0.06 && az > 0.0115 && az < 0.0155) return 'dark'
+  if (!w || y < 0.0045) return null
+  // Arches cut into the body around each wheel.
+  if (CAR.wheels.some((wx) => Math.hypot(x - wx, y - CAR.r) < CAR.r + 0.0035) && az > w - 0.014) return null
+  let top = carRoof(x)
+  // Front wings stand proud of the bonnet, the way a 911's headlights do.
+  const wing = x > 0.03 && az > 0.024
+  if (wing) top = Math.min(CAR.belt + 0.001, top + 0.005)
+  if (y > top) return null
+  if (y > CAR.belt) {
+    // Cabin: narrower, with tumblehome.
+    if (az > 0.031 - (y - CAR.belt) * 0.4) return null
+    const roofPanel = x > -0.03 && x < 0.002 && y > top - 0.004
+    if (!roofPanel && x > -0.05 && x < 0.036 && y > CAR.belt + 0.002) return 'glass'
+    return 'body'
+  }
+  if (az > w) return null
+  // GT3 RS louvres over the front wheels.
+  if (wing && Math.abs(x - CAR.wheels[0]) < 0.011 && az > 0.027 && az < 0.037 && y > top - 0.003) return 'dark'
+  if (x > 0.08 && az > 0.018 && az < 0.034 && y > top - 0.005) return 'light'
+  if (x < -0.095 && y > 0.026 && y < 0.031) return 'dark'
+  // Sills, front splitter and rear diffuser.
+  if (y < 0.009) return 'dark'
+  return 'body'
+}
+
+const CAR_COLORS: Record<Part, string> = {
+  body: '#a3a8ad',
+  glass: '#2a2f35',
+  light: '#eef0ee',
+  dark: '#2b2f34',
+  tyre: '#1c1e21',
+  rim: '#8d9297',
+  caliper: C.teal,
+}
+
+function useCarCells(size: number) {
+  return useMemo(() => {
+    const nx = Math.ceil(0.212 / size)
+    const ny = Math.ceil(0.07 / size)
+    const nz = Math.ceil(0.09 / size)
+    const at = (i: number, j: number, k: number) => [-0.106 + i * size, size / 2 + j * size, -0.045 + k * size] as const
+    const grid: (Part | null)[] = []
+    for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let k = 0; k < nz; k++) grid.push(carPart(...at(i, j, k)))
+    const get = (i: number, j: number, k: number) => (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz ? null : grid[(i * ny + j) * nz + k])
+    const silver = new THREE.Color(CAR_COLORS.body)
+    const bright = new THREE.Color('#c4c8cc')
+    const out: Cell[] = []
+    for (let i = 0; i < nx; i++)
+      for (let j = 0; j < ny; j++)
+        for (let k = 0; k < nz; k++) {
+          const part = get(i, j, k)
+          if (!part) continue
+          // Hidden cells inside the shell are never seen; skip them.
+          if (get(i + 1, j, k) && get(i - 1, j, k) && get(i, j + 1, k) && get(i, j - 1, k) && get(i, j, k + 1) && get(i, j, k - 1)) continue
+          const [x, y, z] = at(i, j, k)
+          const color = part === 'body' ? silver.clone().lerp(bright, Math.random() * 0.5) : new THREE.Color(CAR_COLORS[part])
+          // Assembles from the tail forward.
+          out.push({ x, y, z, color, delay: 0.4 + ((x + 0.106) / 0.212) * 1.5 + Math.random() * 0.35 })
+        }
+    return out
+  }, [size])
+}
+
+function Car({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
+  const size = 0.0026
+  const cells = useCarCells(size)
+  return <VoxelModel cells={cells} size={size} m={m} reducedMotion={reducedMotion} />
 }
 
 function Pen({ m }: { m: Mats }) {
@@ -725,6 +846,9 @@ function Desk({ active, onSelect, reducedMotion }: { active: number; onSelect: (
         {/* Turned to its side so the camera sees the familiar profile: bowed head, chin on fist. */}
         <group position={[0.05, 0, 0.07]} rotation={[0, -1.15, 0]} scale={1.7}>
           <Thinker m={m} reducedMotion={reducedMotion} />
+        </group>
+        <group position={[0.08, 0, 0.4]} rotation={[0, -0.6, 0]}>
+          <Car m={m} reducedMotion={reducedMotion} />
         </group>
         <group position={[-0.66, 0, 0.48]} rotation={[0, 0.04, 0]}>
           {profile.roles.map((r, i) => (
