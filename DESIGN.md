@@ -91,7 +91,7 @@ components:
 
 **Creative North Star: "The Felt & Anodized Desk"**
 
-The whole site is one heather-grey wool felt desk pad seen from above in soft north-window daylight. Each section is a physical stationery object on that pad: a laptop for BANTAY, a folded newspaper for 24/7 Laredo, a clipboard for experience, an index-card box for skills, a kraft envelope for contact, plus a mug that holds no section and exists only for warmth. The 3D desk (React Three Fiber) stays put; navigation moves the camera from object to object and lays a kraft reading sheet onto the felt beside it.
+The whole site is one heather-grey wool felt desk pad seen from above in soft north-window daylight. Each section is a physical stationery object on that pad: a laptop for BANTAY, a folded newspaper for 24/7 Laredo, an index-card box for skills, a kraft envelope for contact, plus a mug that holds no section and exists only for warmth. The 3D desk (React Three Fiber) stays put; navigation moves the camera from object to object and lays a kraft reading sheet onto the felt beside it.
 
 Density is calm and low: one reading sheet per stop, one accent, a single typeface. Materials carry the identity, not ornament: felt fibre, anodized aluminium, kraft paper grain, glossy black embossing tape. The world explicitly refuses the lo-fi night desk (dark room, lamp glow, neon monitor) and the floating desk in a void; the desk is lit by day and fills the frame edge to edge.
 

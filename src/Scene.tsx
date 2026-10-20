@@ -3,7 +3,7 @@ import { ContactShadows, Environment, Lightformer, RoundedBox, Text } from '@rea
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import * as THREE from 'three'
 import fontUrl from '@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-600-normal.woff?url'
-import { experience, profile, stops, type StopId } from './content'
+import { profile, stops, type StopId } from './content'
 
 const C = {
   felt: '#9a9a94',
@@ -31,7 +31,6 @@ const POSES: Record<StopId, Pose> = {
   bantay: { pos: [0.42, 0.6, 0.58], look: [0.3, 0.07, -0.2], off: 0.2, offP: 0.1, posP: [0.42, 1.2, 1.05] },
   laredo: { pos: [0.12, 0.62, 0.3], look: [-0.04, 0, -0.26], off: 0.2, offP: 0.12, posP: [0.1, 1.15, 0.5] },
   brewview: { pos: [0.5, 0.42, 0.18], look: [0.6, 0.06, -0.3], off: 0.2, offP: 0.12, posP: [0.55, 0.95, 0.35] },
-  experience: { pos: [0.03, 0.66, 0.4], look: [0.02, 0, 0.08], off: 0.2, offP: 0.22 },
   skills: { pos: [0.48, 0.42, 0.74], look: [0.58, 0.05, 0.3], off: 0.2, offP: 0.24, posP: [0.5, 0.78, 1.0] },
   contact: { pos: [0.38, 0.5, 0.82], look: [0.36, 0, 0.44], off: 0.2, offP: 0.22 },
 }
@@ -304,32 +303,6 @@ function Laptop({ m }: { m: Mats }) {
   )
 }
 
-function Clipboard({ m }: { m: Mats }) {
-  return (
-    <group>
-      <RoundedBox args={[0.23, 0.004, 0.32]} radius={0.0019} smoothness={3} position={[0, 0.002, 0]} material={m.alu} castShadow receiveShadow />
-      <mesh position={[0, 0.0045, 0.012]} material={m.paper} castShadow receiveShadow>
-        <boxGeometry args={[0.212, 0.0009, 0.282]} />
-      </mesh>
-      <RoundedBox args={[0.1, 0.012, 0.032]} radius={0.004} smoothness={3} position={[0, 0.009, -0.142]} material={m.darkAlu} castShadow />
-      <Label size={0.017} position={[-0.09, 0.0052, -0.11]}>Experience</Label>
-      {experience.map((e, i) => (
-        <group key={e.org} position={[0, 0, i === 0 ? -0.088 : 0.03]}>
-          <Label size={0.0078} position={[-0.09, 0.0052, 0]} maxWidth={0.19}>
-            {`${e.role}, ${e.org}`}
-          </Label>
-          <Label size={0.0052} color="#4d5258" position={[-0.09, 0.0052, 0.012]} maxWidth={0.19}>
-            {`${e.period} · ${e.where}`}
-          </Label>
-          <Label size={0.0052} position={[-0.09, 0.0052, 0.024]} maxWidth={0.19} lineHeight={1.3}>
-            {e.points.map((pt) => `– ${pt}`).join('\n')}
-          </Label>
-        </group>
-      ))}
-    </group>
-  )
-}
-
 // Kraft coffee bag with a rating label: five stars under the BrewView name.
 function CoffeeBag({ m }: { m: Mats }) {
   const w = 0.09
@@ -424,7 +397,7 @@ function Newspaper({ m }: { m: Mats }) {
   )
 }
 
-const tabs = ['Backend', 'Frontend', 'Design']
+const tabs = ['Frontend', 'Backend', 'AI & Data', 'Design']
 
 function CardBox({ m }: { m: Mats }) {
   const w = 0.14
@@ -450,7 +423,7 @@ function CardBox({ m }: { m: Mats }) {
       {tabs.map((label, i) => {
         const tx = i % 2 ? 0.03 : -0.03
         return (
-          <group key={label} position={[0, 0, -0.05 + i * 0.05]} rotation={[-0.12, 0, 0]}>
+          <group key={label} position={[0, 0, -0.075 + i * 0.05]} rotation={[-0.12, 0, 0]}>
             <mesh position={[0, 0.042, 0]} material={m.paper} castShadow receiveShadow>
               <boxGeometry args={[0.128, 0.076, 0.0012]} />
             </mesh>
@@ -567,9 +540,6 @@ function Desk({ active, onSelect }: { active: number; onSelect: (id: StopId) => 
         </Hotspot>
         <Hotspot id="laredo" active={is('laredo')} onSelect={onSelect} position={[-0.04, 0, -0.26]} rotation={[0, 0.2, 0]}>
           <Newspaper m={m} />
-        </Hotspot>
-        <Hotspot id="experience" active={is('experience')} onSelect={onSelect} position={[0.02, 0, 0.08]} rotation={[0, 0.16, 0]}>
-          <Clipboard m={m} />
         </Hotspot>
         <Hotspot id="skills" active={is('skills')} onSelect={onSelect} position={[0.58, 0, 0.3]} rotation={[0, -0.32, 0]}>
           <CardBox m={m} />

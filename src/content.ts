@@ -127,45 +127,27 @@ export const projects: Project[] = [
   },
 ]
 
-export const experience = [
-  {
-    role: 'Freelance Web Developer',
-    org: '24/7 Laredo',
-    where: 'Remote · Laredo, Texas, USA',
-    period: '07/2026 – 08/2026',
-    note: 'Independent local news website · Small development team',
-    points: [
-      'Co-developed a 14-page news website with custom HTML, CSS, and JavaScript on the GoHighLevel platform.',
-      'Built RSS-fed news feeds with category filters, site search, a breaking-news ticker, live weather (Open-Meteo API), and Facebook Reels and YouTube podcast embeds.',
-      'Set up Google Analytics 4 with Consent Mode v2, Google AdSense, and schema.org SEO; wrote a Python/Node script that syntax-checks every page’s inline JavaScript before release.',
-    ],
-  },
-  {
-    role: 'Intern, Electronics & Documentation',
-    org: 'A2K Group',
-    where: 'Bacolor, Pampanga',
-    period: '06/2024 – 07/2024',
-    note: '',
-    points: [
-      'Produced technical documentation and circuit diagrams for a biometric access-system prototype.',
-      'Diagnosed hardware and firmware faults, and assembled and soldered prototype components.',
-    ],
-  },
-]
-
+// `core` is the day-to-day toolkit, shown as highlighted chips. `more` is everything else, shown as plain text.
 export const skills = [
   {
-    group: 'Backend',
-    items: ['Python', 'Flask', 'Node.js', 'Express.js', 'Jinja2', 'REST APIs', 'SQL', 'SQLite', 'pandas', 'NumPy', 'Ollama', 'Gemma 4', 'SEA-LION', 'Gemini (Vertex AI)', 'Google Cloud Vision', 'OCR (Tesseract, PaddleOCR)', 'LLM evaluation', 'Data labeling and quality review', 'Java', 'C++', 'Git and GitHub', 'pytest', 'Jupyter and Google Colab'],
+    group: 'Frontend',
+    core: ['React', 'React Native', 'Angular', 'HTML', 'CSS', 'Sass/SCSS', 'JavaScript', 'TypeScript'],
+    more: ['Chart.js', 'Leaflet.js', 'GoHighLevel', 'Google Analytics 4', 'SEO and schema.org markup'],
   },
   {
-    group: 'Frontend',
-    items: ['HTML5', 'CSS3', 'JavaScript', 'Chart.js', 'Leaflet.js', 'GoHighLevel', 'Google Analytics 4', 'SEO and schema.org markup'],
+    group: 'Backend',
+    core: ['Node.js', 'Express.js', 'Python', 'Java', 'SQL', 'MongoDB', 'Firebase', 'Supabase'],
+    more: ['Flask', 'PHP', 'MySQL', 'SQLite', 'REST APIs', 'Jinja2', 'C++', 'Git and GitHub', 'pytest', 'Jupyter and Google Colab'],
   },
-  // Design is the thinnest part of the CV; only what the CV supports is listed here.
+  {
+    group: 'AI and data',
+    core: ['LLM evaluation', 'OCR', 'Ollama', 'Gemma 4', 'SEA-LION', 'Gemini (Vertex AI)'],
+    more: ['Google Cloud Vision', 'Tesseract', 'PaddleOCR', 'pandas', 'NumPy', 'Data labeling and quality review'],
+  },
   {
     group: 'Design',
-    items: ['Responsive page layout', 'Technical documentation and circuit diagrams'],
+    core: ['Figma'],
+    more: ['Responsive page layout', 'Technical documentation and circuit diagrams'],
   },
 ]
 
@@ -175,7 +157,6 @@ export const stops = [
   { id: 'bantay', label: 'BANTAY' },
   { id: 'laredo', label: '24/7 Laredo' },
   { id: 'brewview', label: 'BrewView' },
-  { id: 'experience', label: 'Experience' },
   { id: 'skills', label: 'Skills' },
   { id: 'contact', label: 'Contact' },
 ] as const

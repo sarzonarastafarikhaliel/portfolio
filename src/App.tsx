@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { experience, profile, projects, skills, stops, type Project } from './content'
+import { profile, projects, skills, stops, type Project } from './content'
 
 const Scene = lazy(() => import('./Scene'))
 
@@ -170,39 +170,24 @@ export default function App() {
           </section>
         ))}
 
-        <section id="experience" className="stop-section">
-          <article className="sheet">
-            <h2>Experience</h2>
-            {experience.map((e) => (
-              <div key={e.org} className="entry">
-                <h3>
-                  {e.role}, {e.org}
-                </h3>
-                <p className="meta">
-                  {e.period} · {e.where}
-                  {e.note && ` · ${e.note}`}
-                </p>
-                <ul className="points">
-                  {e.points.map((pt) => (
-                    <li key={pt}>{pt}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </article>
-        </section>
-
         <section id="skills" className="stop-section">
           <article className="sheet">
             <h2>Skills</h2>
-            <dl className="skills">
+            <div className="skills">
               {skills.map((g) => (
-                <div key={g.group}>
-                  <dt>{g.group}</dt>
-                  <dd>{g.items.join(', ')}</dd>
-                </div>
+                <section key={g.group} aria-labelledby={`skills-${g.group}`}>
+                  <h3 id={`skills-${g.group}`}>{g.group}</h3>
+                  <ul className="tags" aria-label={`${g.group}, core`}>
+                    {g.core.map((i) => (
+                      <li key={i}>{i}</li>
+                    ))}
+                  </ul>
+                  <p className="more">
+                    <span>Also:</span> {g.more.join(', ')}
+                  </p>
+                </section>
               ))}
-            </dl>
+            </div>
           </article>
         </section>
 
