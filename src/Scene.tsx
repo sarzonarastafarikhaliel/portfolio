@@ -117,6 +117,8 @@ function useMaterials() {
       kraft: new THREE.MeshStandardMaterial({ map: kraftMap, roughness: 0.92 }),
       paper: new THREE.MeshStandardMaterial({ color: C.paper, roughness: 0.9 }),
       ink: new THREE.MeshStandardMaterial({ color: '#25292d', roughness: 0.6 }),
+      voxel: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.42, metalness: 0.25 }),
+      stone: new THREE.MeshStandardMaterial({ color: '#c9c9c4', roughness: 0.92, flatShading: true }),
       news: new THREE.MeshStandardMaterial({ color: '#e4e1d8', roughness: 0.95 }),
       photo: new THREE.MeshStandardMaterial({ color: '#8a8f94', roughness: 0.9 }),
       tape: new THREE.MeshPhysicalMaterial({ color: '#17191c', roughness: 0.38, clearcoat: 0.6 }),
@@ -489,6 +491,134 @@ function Mug({ m }: { m: Mats }) {
   )
 }
 
+// Rodin's Thinker as a voxel figurine: the pose is built from capsules (a signed distance field),
+// sampled on a grid, and every filled cell becomes one instanced cube. On load the cubes assemble
+// from the feet up, like a model learning its shape.
+type Seg = [number, number, number, number, number, number, number]
+const THINKER: Seg[] = [
+  // ax, ay, az, bx, by, bz, radius (metres; figure faces +z, its right hand is -x)
+  [0, 0.068, -0.004, 0, 0.114, 0.02, 0.0185], // torso, leaning forward
+  [0, 0.114, 0.02, -0.003, 0.13, 0.034, 0.0065], // neck
+  [-0.003, 0.138, 0.041, -0.003, 0.138, 0.041, 0.0125], // head, bowed
+  [-0.011, 0.064, 0.0, -0.012, 0.07, 0.046, 0.0102], // right thigh
+  [0.011, 0.064, 0.0, 0.013, 0.07, 0.046, 0.0102], // left thigh
+  [-0.012, 0.07, 0.046, -0.014, 0.026, 0.05, 0.0085], // right shin
+  [0.013, 0.07, 0.046, 0.016, 0.026, 0.052, 0.0085], // left shin
+  [-0.014, 0.024, 0.05, -0.016, 0.02, 0.068, 0.006], // right foot
+  [0.016, 0.024, 0.052, 0.019, 0.02, 0.07, 0.006], // left foot
+  [-0.016, 0.111, 0.018, 0.004, 0.082, 0.046, 0.007], // right upper arm, elbow on the left knee
+  [0.004, 0.082, 0.046, -0.003, 0.122, 0.052, 0.0064], // right forearm, up to the chin
+  [-0.003, 0.124, 0.051, -0.003, 0.124, 0.051, 0.0068], // fist under the chin
+  [0.017, 0.111, 0.016, 0.021, 0.086, 0.034, 0.007], // left upper arm
+  [0.021, 0.086, 0.034, 0.015, 0.075, 0.052, 0.0064], // left forearm, hand on the knee
+]
+
+function segDist(p: THREE.Vector3, s: Seg, a: THREE.Vector3, b: THREE.Vector3, ab: THREE.Vector3, ap: THREE.Vector3) {
+  a.set(s[0], s[1], s[2])
+  b.set(s[3], s[4], s[5])
+  ab.subVectors(b, a)
+  ap.subVectors(p, a)
+  const len2 = ab.lengthSq()
+  const t = len2 ? Math.min(1, Math.max(0, ap.dot(ab) / len2)) : 0
+  return ap.sub(ab.multiplyScalar(t)).length() - s[6]
+}
+
+function useThinkerVoxels(size: number) {
+  return useMemo(() => {
+    const out: { x: number; y: number; z: number }[] = []
+    const p = new THREE.Vector3()
+    const a = new THREE.Vector3()
+    const b = new THREE.Vector3()
+    const ab = new THREE.Vector3()
+    const ap = new THREE.Vector3()
+    for (let y = 0.004; y < 0.152; y += size)
+      for (let x = -0.034; x < 0.034; x += size)
+        for (let z = -0.024; z < 0.08; z += size) {
+          p.set(x, y, z)
+          if (THINKER.some((s) => segDist(p, s, a, b, ab, ap) < 0)) out.push({ x, y, z })
+        }
+    return out
+  }, [size])
+}
+
+function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
+  const size = 0.0026
+  const voxels = useThinkerVoxels(size)
+  const ref = useRef<THREE.InstancedMesh>(null)
+  const start = useRef<number | null>(null)
+  const done = useRef(false)
+
+  // Per-cube colour: teal low on the body fading to aluminium at the head, with a little noise.
+  const anim = useMemo(() => {
+    const teal = new THREE.Color(C.teal)
+    const pale = new THREE.Color('#c9dcdb')
+    const c = new THREE.Color()
+    return voxels.map((v) => {
+      const t = Math.min(1, v.y / 0.15 + (Math.random() - 0.5) * 0.35)
+      c.copy(teal).lerp(pale, t)
+      const dir = new THREE.Vector3(Math.random() - 0.5, 0.6 + Math.random(), Math.random() - 0.5).normalize()
+      return { color: c.clone(), dir, delay: (v.y / 0.15) * 1.6 + Math.random() * 0.35 }
+    })
+  }, [voxels])
+
+  useLayoutEffect(() => {
+    const mesh = ref.current!
+    voxels.forEach((_, i) => mesh.setColorAt(i, anim[i].color))
+    mesh.instanceColor!.needsUpdate = true
+  }, [voxels, anim])
+
+  const o = useMemo(() => new THREE.Object3D(), [])
+  useFrame(({ clock }) => {
+    const mesh = ref.current
+    if (!mesh || done.current) return
+    if (start.current === null) start.current = clock.elapsedTime
+    const t = reducedMotion ? 99 : clock.elapsedTime - start.current
+    let settled = true
+    voxels.forEach((v, i) => {
+      const k = Math.min(1, Math.max(0, (t - anim[i].delay) / 0.7))
+      const e = 1 - Math.pow(1 - k, 3)
+      if (k < 1) settled = false
+      const fly = (1 - e) * 0.09
+      o.position.set(v.x + anim[i].dir.x * fly, v.y + anim[i].dir.y * fly, v.z + anim[i].dir.z * fly)
+      o.scale.setScalar(Math.max(0.0001, e) * size * 0.9)
+      o.updateMatrix()
+      mesh.setMatrixAt(i, o.matrix)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    if (settled) done.current = true
+  })
+
+  const rock = useMemo(() => {
+    // Low-poly stone: a few jittered icosahedra, flat shaded.
+    const make = (seed: number) => {
+      const g = new THREE.IcosahedronGeometry(1, 0)
+      const pos = g.attributes.position
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i)
+        const y = pos.getY(i)
+        const z = pos.getZ(i)
+        // Hash by position, not index, so duplicated corner vertices move together and the stone stays closed.
+        const j = 1 + Math.sin(x * 12.9898 + y * 78.233 + z * 37.719 + seed) * 0.13
+        pos.setXYZ(i, x * j, y * j, z * j)
+      }
+      g.computeVertexNormals()
+      return g
+    }
+    return [make(1), make(7)]
+  }, [])
+
+  return (
+    <group>
+      {/* One stone with a lower step in front for the feet. */}
+      <mesh geometry={rock[0]} material={m.stone} position={[0, 0.03, 0.006]} scale={[0.04, 0.038, 0.038]} castShadow receiveShadow />
+      <mesh geometry={rock[1]} material={m.stone} position={[0.002, 0.012, 0.046]} scale={[0.046, 0.02, 0.036]} castShadow receiveShadow />
+      <instancedMesh ref={ref} args={[undefined, undefined, voxels.length]} material={m.voxel} castShadow receiveShadow frustumCulled={false}>
+        <boxGeometry args={[1, 1, 1]} />
+      </instancedMesh>
+    </group>
+  )
+}
+
 function Pen({ m }: { m: Mats }) {
   return (
     <group rotation={[0, 0, Math.PI / 2]} position={[0, 0.0046, 0]}>
@@ -525,7 +655,7 @@ function Tape({ text, m, scale = 1, ...rest }: { text: string; m: Mats; scale?: 
   )
 }
 
-function Desk({ active, onSelect }: { active: number; onSelect: (id: StopId) => void }) {
+function Desk({ active, onSelect, reducedMotion }: { active: number; onSelect: (id: StopId) => void; reducedMotion: boolean }) {
   const m = useMaterials()
   const is = (id: StopId) => stops[active]?.id === id
   return (
@@ -555,6 +685,10 @@ function Desk({ active, onSelect }: { active: number; onSelect: (id: StopId) => 
         </Hotspot>
         <group position={[0.22, 0, 0.1]} rotation={[0, 0.5, 0]}>
           <Pen m={m} />
+        </group>
+        {/* Turned to its side so the camera sees the familiar profile: bowed head, chin on fist. */}
+        <group position={[0.05, 0, 0.07]} rotation={[0, -1.15, 0]} scale={1.7}>
+          <Thinker m={m} reducedMotion={reducedMotion} />
         </group>
         <group position={[-0.66, 0, 0.48]} rotation={[0, 0.04, 0]}>
           {profile.roles.map((r, i) => (
@@ -603,7 +737,7 @@ export default function Scene({ progress, active, reducedMotion, onSelect }: Pro
           <Lightformer form="rect" intensity={1.1} color="#eef0f2" position={[0, 3.5, 0.4]} rotation-x={Math.PI / 2} scale={[3, 2, 1]} />
           <Lightformer form="rect" intensity={0.25} color="#9a9a94" position={[0, -1, 0]} rotation-x={Math.PI / 2} scale={[6, 6, 1]} />
         </Environment>
-        <Desk active={active} onSelect={onSelect} />
+        <Desk active={active} onSelect={onSelect} reducedMotion={reducedMotion} />
         <ContactShadows position={[0, 0.0052, 0.05]} scale={[2.4, 1.6]} resolution={1024} blur={2.4} opacity={0.55} far={0.12} color="#23262a" frames={1} />
         <CameraRig progress={progress} reducedMotion={reducedMotion} />
       </Canvas>
