@@ -7,7 +7,7 @@ import { profile, stops, type StopId } from './content'
 
 const C = {
   felt: '#9a9a94',
-  desk: '#4a4f55',
+  desk: '#948e84',
   alu: '#d9dcdf',
   kraft: '#c8a77a',
   ink: '#1d2024',
@@ -89,6 +89,39 @@ function fibreTexture(base: string, strands: number, light: string, dark: string
   return t
 }
 
+// Procedural wood grain: long wavy lines running along x. Waves use whole periods so the texture tiles.
+function woodTexture(base: string, light: string, dark: string, repeat: number) {
+  const size = 1024
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const g = c.getContext('2d')!
+  g.fillStyle = base
+  g.fillRect(0, 0, size, size)
+  for (let i = 0; i < 260; i++) {
+    const y0 = Math.random() * size
+    const amp = 1 + Math.random() * 6
+    const k = ((1 + Math.floor(Math.random() * 3)) * Math.PI * 2) / size
+    const phase = Math.random() * Math.PI * 2
+    g.strokeStyle = Math.random() < 0.35 ? light : dark
+    g.globalAlpha = 0.05 + Math.random() * 0.18
+    g.lineWidth = 0.6 + Math.random() * 2.4
+    for (const dy of [-size, 0, size]) {
+      g.beginPath()
+      for (let x = 0; x <= size; x += 8) {
+        const y = y0 + dy + Math.sin(x * k + phase) * amp
+        if (x) g.lineTo(x, y)
+        else g.moveTo(x, y)
+      }
+      g.stroke()
+    }
+  }
+  const t = new THREE.CanvasTexture(c)
+  t.wrapS = t.wrapT = THREE.RepeatWrapping
+  t.repeat.set(repeat, repeat)
+  t.anisotropy = 8
+  return t
+}
+
 function useMaterials() {
   return useMemo(() => {
     // Base sits below the #9a9a94 token because window light lifts it; lit, it reads close to the token.
@@ -97,6 +130,9 @@ function useMaterials() {
     const feltBump = fibreTexture('#808080', 30000, '#ffffff', '#000000', 5, 6, 0.22)
     const kraftMap = fibreTexture(C.kraft, 5000, '#ddc097', '#a5845a', 8, 2)
     kraftMap.colorSpace = THREE.SRGBColorSpace
+    // Grey-washed ash, set below its lit value like the felt.
+    const deskMap = woodTexture(C.desk, '#b8b2a7', '#6f6a61', 2)
+    deskMap.colorSpace = THREE.SRGBColorSpace
     return {
       felt: new THREE.MeshPhysicalMaterial({
         map: feltMap,
@@ -107,7 +143,7 @@ function useMaterials() {
         sheenRoughness: 0.75,
         sheenColor: new THREE.Color('#d8d8d2'),
       }),
-      desk: new THREE.MeshStandardMaterial({ color: C.desk, roughness: 0.55 }),
+      desk: new THREE.MeshStandardMaterial({ map: deskMap, roughness: 0.62 }),
       alu: new THREE.MeshPhysicalMaterial({ color: C.alu, metalness: 0.55, roughness: 0.42, anisotropy: 0.7, anisotropyRotation: Math.PI / 2 }),
       darkAlu: new THREE.MeshPhysicalMaterial({ color: '#8d9297', metalness: 0.6, roughness: 0.45 }),
       key: new THREE.MeshStandardMaterial({ color: '#2b2f34', roughness: 0.7 }),
@@ -663,7 +699,7 @@ function Desk({ active, onSelect, reducedMotion }: { active: number; onSelect: (
       <mesh position={[0, -0.003, 0]} material={m.desk} receiveShadow>
         <boxGeometry args={[8, 0.006, 6]} />
       </mesh>
-      <RoundedBox args={[7, 0.005, 7]} radius={0.0024} smoothness={3} position={[0, 0.0025, 0]} material={m.felt} receiveShadow />
+      <RoundedBox args={[2.0, 0.005, 1.6]} radius={0.0024} smoothness={3} position={[0.05, 0.0025, 0.15]} material={m.felt} castShadow receiveShadow />
       <group position={[0, 0.005, 0]}>
         <Hotspot id="bantay" active={is('bantay')} onSelect={onSelect} position={[0.3, 0, -0.22]} rotation={[0, -0.14, 0]}>
           <Laptop m={m} />
