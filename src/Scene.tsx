@@ -3,16 +3,17 @@ import { ContactShadows, Environment, Lightformer, RoundedBox, Text } from '@rea
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 import * as THREE from 'three'
 import fontUrl from '@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-600-normal.woff?url'
+import nameFontUrl from '@fontsource/archivo-black/files/archivo-black-latin-400-normal.woff?url'
 import { profile, stops, type StopId } from './content'
 
 const C = {
-  felt: '#9a9a94',
-  desk: '#948e84',
+  felt: '#232323',
+  desk: '#141518',
   alu: '#d9dcdf',
-  kraft: '#c8a77a',
+  kraft: '#b8b8b8',
   ink: '#1d2024',
-  teal: '#1f8a8a',
-  paper: '#eceae4',
+  accent: '#d0241c',
+  paper: '#ececec',
 }
 
 type Props = {
@@ -124,14 +125,14 @@ function woodTexture(base: string, light: string, dark: string, repeat: number) 
 
 function useMaterials() {
   return useMemo(() => {
-    // Base sits below the #9a9a94 token because window light lifts it; lit, it reads close to the token.
-    const feltMap = fibreTexture('#7c7d78', 30000, '#9d9e98', '#62635f', 5, 6, 0.1, 5000)
+    // Charcoal felt for the night desk; the spotlight lifts it to a dark grey in its pool.
+    const feltMap = fibreTexture('#232323', 30000, '#383838', '#151515', 5, 6, 0.1, 5000)
     feltMap.colorSpace = THREE.SRGBColorSpace
     const feltBump = fibreTexture('#808080', 30000, '#ffffff', '#000000', 5, 6, 0.22)
-    const kraftMap = fibreTexture(C.kraft, 5000, '#ddc097', '#a5845a', 8, 2)
+    const kraftMap = fibreTexture(C.kraft, 5000, '#d2d2d2', '#8e8e8e', 8, 2)
     kraftMap.colorSpace = THREE.SRGBColorSpace
-    // Grey-washed ash, set below its lit value like the felt.
-    const deskMap = woodTexture(C.desk, '#b8b2a7', '#6f6a61', 2)
+    // Ebonised ash: nearly black, with the grain just catching the light.
+    const deskMap = woodTexture(C.desk, '#24252a', '#08090a', 2)
     deskMap.colorSpace = THREE.SRGBColorSpace
     return {
       felt: new THREE.MeshPhysicalMaterial({
@@ -141,21 +142,21 @@ function useMaterials() {
         roughness: 1,
         sheen: 1,
         sheenRoughness: 0.75,
-        sheenColor: new THREE.Color('#d8d8d2'),
+        sheenColor: new THREE.Color('#6b6b6b'),
       }),
       desk: new THREE.MeshStandardMaterial({ map: deskMap, roughness: 0.62 }),
       alu: new THREE.MeshPhysicalMaterial({ color: C.alu, metalness: 0.55, roughness: 0.42, anisotropy: 0.7, anisotropyRotation: Math.PI / 2 }),
       darkAlu: new THREE.MeshPhysicalMaterial({ color: '#8d9297', metalness: 0.6, roughness: 0.45 }),
       key: new THREE.MeshStandardMaterial({ color: '#2b2f34', roughness: 0.7 }),
       glass: new THREE.MeshPhysicalMaterial({ color: '#c3c7cb', metalness: 0.4, roughness: 0.28 }),
-      emboss: new THREE.MeshStandardMaterial({ color: '#ecece7', roughness: 0.45 }),
-      teal: new THREE.MeshPhysicalMaterial({ color: C.teal, metalness: 0.85, roughness: 0.3, clearcoat: 0.4 }),
+      emboss: new THREE.MeshStandardMaterial({ color: '#ececec', roughness: 0.45 }),
+      accent: new THREE.MeshPhysicalMaterial({ color: C.accent, metalness: 0.85, roughness: 0.3, clearcoat: 0.4 }),
       kraft: new THREE.MeshStandardMaterial({ map: kraftMap, roughness: 0.92 }),
       paper: new THREE.MeshStandardMaterial({ color: C.paper, roughness: 0.9 }),
       ink: new THREE.MeshStandardMaterial({ color: '#25292d', roughness: 0.6 }),
       voxel: new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.42, metalness: 0.25 }),
-      stone: new THREE.MeshStandardMaterial({ color: '#c9c9c4', roughness: 0.92, flatShading: true }),
-      news: new THREE.MeshStandardMaterial({ color: '#e4e1d8', roughness: 0.95 }),
+      stone: new THREE.MeshStandardMaterial({ color: '#c9c9c9', roughness: 0.92, flatShading: true }),
+      news: new THREE.MeshStandardMaterial({ color: '#e2e2e2', roughness: 0.95 }),
       photo: new THREE.MeshStandardMaterial({ color: '#8a8f94', roughness: 0.9 }),
       tape: new THREE.MeshPhysicalMaterial({ color: '#17191c', roughness: 0.38, clearcoat: 0.6 }),
       ceramic: new THREE.MeshPhysicalMaterial({ color: '#c9ccc9', roughness: 0.35, clearcoat: 1, clearcoatRoughness: 0.15 }),
@@ -227,7 +228,7 @@ function Hotspot({ id, active, onSelect, children, ...rest }: HotspotProps) {
   const over = (e: ThreeEvent<PointerEvent>) => {
     e.stopPropagation()
     setHover(true)
-    document.body.style.cursor = 'pointer'
+    document.body.style.cursor = 'var(--cursor-pointer)'
   }
   const out = () => {
     setHover(false)
@@ -375,7 +376,7 @@ function CoffeeBag({ m }: { m: Mats }) {
         BREWVIEW
       </Text>
       {[-2, -1, 0, 1, 2].map((i) => (
-        <mesh key={i} geometry={star} position={[i * 0.0125, 0.068, d / 2 + 0.0016]} material={m.teal} />
+        <mesh key={i} geometry={star} position={[i * 0.0125, 0.068, d / 2 + 0.0016]} material={m.accent} />
       ))}
       <Text font={fontUrl} fontSize={0.0052} color="#4d5258" anchorX="center" anchorY="middle" position={[0, 0.047, d / 2 + 0.0016]} letterSpacing={0.06}>
         COFFEE REVIEWS
@@ -494,7 +495,7 @@ function Envelope({ m }: { m: Mats }) {
       </mesh>
       <mesh geometry={flap} material={m.kraft} position={[0, 0.0031, -0.055]} rotation={[Math.PI / 2, 0, 0]} castShadow />
       <Label size={0.0095} position={[-0.02, 0.0032, 0.012]}>R. K. Sarzona</Label>
-      <Label size={0.0068} color="#3b3328" position={[-0.02, 0.0032, 0.028]}>rastafarisarzona2@gmail.com</Label>
+      <Label size={0.0068} color="#2a2a2a" position={[-0.02, 0.0032, 0.028]}>rastafarisarzona2@gmail.com</Label>
       <Tape text="CONTACT" position={[-0.095, 0.0032, 0.03]} rotation={[0, 0.04, 0]} m={m} />
     </group>
   )
@@ -624,13 +625,13 @@ function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
   const size = 0.0026
   const voxels = useThinkerVoxels(size)
 
-  // Per-cube colour: teal low on the body fading to aluminium at the head, with a little noise.
+  // Per-cube colour: dark aluminium low on the body fading to paper white at the head, with a little noise.
   const cells = useMemo(() => {
-    const teal = new THREE.Color(C.teal)
-    const pale = new THREE.Color('#c9dcdb')
+    const low = new THREE.Color('#8d9297')
+    const pale = new THREE.Color(C.paper)
     return voxels.map((v) => {
       const t = Math.min(1, v.y / 0.15 + (Math.random() - 0.5) * 0.35)
-      return { ...v, color: teal.clone().lerp(pale, t), delay: (v.y / 0.15) * 1.6 + Math.random() * 0.35 }
+      return { ...v, color: low.clone().lerp(pale, t), delay: (v.y / 0.15) * 1.6 + Math.random() * 0.35 }
     })
   }, [voxels])
 
@@ -663,7 +664,7 @@ function Thinker({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
   )
 }
 
-// A 1:23 Porsche 911 GT3 RS in GT Silver, voxelised like the Thinker. The body is a side profile
+// A 1:23 Porsche 911 GT3 RS in Guards Red, the scene's one red object, voxelised like the Thinker. The body is a side profile
 // (roof line) swept across a plan width, with a narrower cabin above the belt line, cut-out arches,
 // wheels, and the swan-neck wing. Only surface cells are kept. Front is +x, units are metres.
 const CAR_ROOF: [number, number][] = [
@@ -693,7 +694,7 @@ type Part = 'body' | 'glass' | 'light' | 'dark' | 'tyre' | 'rim' | 'caliper'
 function carPart(x: number, y: number, z: number): Part | null {
   const az = Math.abs(z)
   const w = carWidth(x)
-  // Wheels: tyre, rim face, and a teal caliper seen through the spokes at the top front.
+  // Wheels: tyre, rim face, and a light caliper seen through the spokes at the top front.
   for (const wx of CAR.wheels) {
     const d = Math.hypot(x - wx, y - CAR.r)
     if (d < CAR.r && az > CAR.hw - 0.012 && az < CAR.hw - 0.0005) {
@@ -733,13 +734,13 @@ function carPart(x: number, y: number, z: number): Part | null {
 }
 
 const CAR_COLORS: Record<Part, string> = {
-  body: '#a3a8ad',
+  body: '#a8141a',
   glass: '#2a2f35',
   light: '#eef0ee',
   dark: '#2b2f34',
   tyre: '#1c1e21',
   rim: '#8d9297',
-  caliper: C.teal,
+  caliper: C.alu,
 }
 
 function useCarCells(size: number) {
@@ -751,8 +752,8 @@ function useCarCells(size: number) {
     const grid: (Part | null)[] = []
     for (let i = 0; i < nx; i++) for (let j = 0; j < ny; j++) for (let k = 0; k < nz; k++) grid.push(carPart(...at(i, j, k)))
     const get = (i: number, j: number, k: number) => (i < 0 || j < 0 || k < 0 || i >= nx || j >= ny || k >= nz ? null : grid[(i * ny + j) * nz + k])
-    const silver = new THREE.Color(CAR_COLORS.body)
-    const bright = new THREE.Color('#c4c8cc')
+    const paint = new THREE.Color(CAR_COLORS.body)
+    const bright = new THREE.Color(C.accent)
     const out: Cell[] = []
     for (let i = 0; i < nx; i++)
       for (let j = 0; j < ny; j++)
@@ -762,7 +763,7 @@ function useCarCells(size: number) {
           // Hidden cells inside the shell are never seen; skip them.
           if (get(i + 1, j, k) && get(i - 1, j, k) && get(i, j + 1, k) && get(i, j - 1, k) && get(i, j, k + 1) && get(i, j, k - 1)) continue
           const [x, y, z] = at(i, j, k)
-          const color = part === 'body' ? silver.clone().lerp(bright, Math.random() * 0.5) : new THREE.Color(CAR_COLORS[part])
+          const color = part === 'body' ? paint.clone().lerp(bright, Math.random() * 0.5) : new THREE.Color(CAR_COLORS[part])
           // Assembles from the tail forward.
           out.push({ x, y, z, color, delay: 0.4 + ((x + 0.106) / 0.212) * 1.5 + Math.random() * 0.35 })
         }
@@ -779,7 +780,7 @@ function Car({ m, reducedMotion }: { m: Mats; reducedMotion: boolean }) {
 function Pen({ m }: { m: Mats }) {
   return (
     <group rotation={[0, 0, Math.PI / 2]} position={[0, 0.0046, 0]}>
-      <mesh material={m.teal} castShadow>
+      <mesh material={m.accent} castShadow>
         <cylinderGeometry args={[0.0046, 0.0046, 0.13, 24]} />
       </mesh>
       <mesh position={[0, -0.072, 0]} rotation={[Math.PI, 0, 0]} material={m.alu} castShadow>
@@ -817,10 +818,11 @@ function Desk({ active, onSelect, reducedMotion }: { active: number; onSelect: (
   const is = (id: StopId) => stops[active]?.id === id
   return (
     <group>
-      <mesh position={[0, -0.003, 0]} material={m.desk} receiveShadow>
+      {/* Desk and felt draw first (renderOrder -1) so the poster name can sit on them, under everything else. */}
+      <mesh position={[0, -0.003, 0]} material={m.desk} receiveShadow renderOrder={-1}>
         <boxGeometry args={[8, 0.006, 6]} />
       </mesh>
-      <RoundedBox args={[2.0, 0.005, 1.6]} radius={0.0024} smoothness={3} position={[0.05, 0.0025, 0.15]} material={m.felt} castShadow receiveShadow />
+      <RoundedBox args={[2.0, 0.005, 1.6]} radius={0.0024} smoothness={3} position={[0.05, 0.0025, 0.15]} material={m.felt} castShadow receiveShadow renderOrder={-1} />
       <group position={[0, 0.005, 0]}>
         <Hotspot id="bantay" active={is('bantay')} onSelect={onSelect} position={[0.3, 0, -0.22]} rotation={[0, -0.14, 0]}>
           <Laptop m={m} />
@@ -860,6 +862,73 @@ function Desk({ active, onSelect, reducedMotion }: { active: number; onSelect: (
   )
 }
 
+// Poster headline: the full name in display type, pinned to the top of the screen like page text.
+// It draws after the desk and felt with no depth test, and before every object, so the objects
+// stand in front of the letters the way the flower overlaps the title on a poster.
+// Given names on the first line, surname on the second.
+const NAME = profile.name.toUpperCase().replace(/ (\S+)$/, '\n$1')
+const NAME_TOP = 76 // px from the top of the screen, under the bar
+const NAME_DIST = 0.3 // metres in front of the camera
+
+function PosterName() {
+  const { camera, size } = useThree()
+  const group = useRef<THREE.Group>(null)
+  // Tight letter bounds [minX, minY, maxX, maxY] at font size 1, known once the font has laid out.
+  const bounds = useRef<number[] | null>(null)
+  const lastH = useRef(-1)
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: C.paper, depthTest: false, depthWrite: false, toneMapped: false, fog: false, alphaToCoverage: true }), [])
+
+  useFrame(() => {
+    const g = group.current
+    const b = bounds.current
+    if (!g || !b) return
+    const cam = camera as THREE.PerspectiveCamera
+    const { width: w, height: h } = size
+    const perPx = (2 * NAME_DIST * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2)) / h
+    const gutter = Math.min(72, Math.max(16, w * 0.045)) // mirrors --gutter in styles.css
+    // As wide as the hero copy column (36rem), so the name heads the copy and leaves the desk clear.
+    const scale = (Math.min(w - gutter * 2, 576) * perPx) / (b[2] - b[0])
+    // The hero copy starts below the name, so hand its height to the CSS.
+    const heightPx = Math.round(((b[3] - b[1]) * scale) / perPx)
+    if (heightPx !== lastH.current) {
+      lastH.current = heightPx
+      document.documentElement.style.setProperty('--name-h', `${heightPx}px`)
+    }
+    // Scrolls away with the page. setViewOffset shifts the image, so add the offset back to stay put on screen.
+    const top = NAME_TOP - scrollY
+    g.visible = top + heightPx > 0
+    const ox = cam.view?.enabled ? cam.view.offsetX : 0
+    const oy = cam.view?.enabled ? cam.view.offsetY : 0
+    g.position.copy(cam.position)
+    g.quaternion.copy(cam.quaternion)
+    g.translateX((gutter + ox - w / 2) * perPx - b[0] * scale)
+    g.translateY((h / 2 - top - oy) * perPx - b[3] * scale)
+    g.translateZ(-NAME_DIST)
+    g.scale.setScalar(scale)
+  })
+
+  return (
+    <group ref={group}>
+      <Text
+        font={nameFontUrl}
+        fontSize={1}
+        letterSpacing={-0.02}
+        lineHeight={0.95}
+        material={mat}
+        renderOrder={-0.5}
+        onSync={(t) => {
+          bounds.current = t.textRenderInfo.visibleBounds
+          // Troika forces transparency, which would draw the name after every object. Opaque keeps it
+          // in the renderOrder queue; alpha-to-coverage still smooths the glyph edges.
+          t.material.transparent = false
+        }}
+      >
+        {NAME}
+      </Text>
+    </group>
+  )
+}
+
 export default function Scene({ progress, active, reducedMotion, onSelect }: Props) {
   return (
     <div className="scene" aria-hidden="true">
@@ -870,36 +939,37 @@ export default function Scene({ progress, active, reducedMotion, onSelect }: Pro
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.86 }}
         style={{ touchAction: 'pan-y' }}
       >
-        <color attach="background" args={['#61625e']} />
-        <fog attach="fog" args={['#61625e', 3, 8]} />
-        <hemisphereLight args={['#eef1f3', '#6a6b67', 0.4]} />
-        <directionalLight
-          position={[-2.0, 2.3, 0.15]}
-          intensity={3.4}
-          color="#f7f5f0"
+        <color attach="background" args={['#0a0a0a']} />
+        <fog attach="fog" args={['#0a0a0a', 2.2, 5]} />
+        <hemisphereLight args={['#cfd3d8', '#101010', 0.12]} />
+        {/* One lamp over the desk at night: a soft pool of light that falls off into black. */}
+        <spotLight
+          position={[-0.9, 2.0, 0.5]}
+          angle={0.55}
+          penumbra={0.9}
+          intensity={22}
+          color="#f4f6f8"
           castShadow
           shadow-mapSize={[2048, 2048]}
           shadow-bias={-0.0001}
           shadow-normalBias={0.0015}
           shadow-radius={5}
-          shadow-camera-left={-1.3}
-          shadow-camera-right={1.3}
-          shadow-camera-top={1.3}
-          shadow-camera-bottom={-1.3}
           shadow-camera-near={0.5}
           shadow-camera-far={6}
         />
-        {/* Soft north-window daylight for reflections on the aluminium; built locally, no HDR download. */}
-        <Environment resolution={256} frames={1} environmentIntensity={1.1}>
+        {/* Faint studio light for reflections on the aluminium; built locally, no HDR download. */}
+        <Environment resolution={256} frames={1} environmentIntensity={0.35}>
           <Lightformer form="rect" intensity={1.6} color="#f4f6f8" position={[-2.5, 3, -1.5]} scale={[4, 2.5, 1]} target={[0, 0, 0]} />
-          <Lightformer form="rect" intensity={0.6} color="#e7e2d8" position={[3, 1.5, 1.5]} scale={[3, 2, 1]} target={[0, 0, 0]} />
+          <Lightformer form="rect" intensity={0.6} color="#e6e6e6" position={[3, 1.5, 1.5]} scale={[3, 2, 1]} target={[0, 0, 0]} />
           <Lightformer form="rect" intensity={1.2} color="#eef0f2" position={[0, 2, 3]} scale={[5, 3, 1]} target={[0, 0, 0]} />
           <Lightformer form="rect" intensity={1.1} color="#eef0f2" position={[0, 3.5, 0.4]} rotation-x={Math.PI / 2} scale={[3, 2, 1]} />
-          <Lightformer form="rect" intensity={0.25} color="#9a9a94" position={[0, -1, 0]} rotation-x={Math.PI / 2} scale={[6, 6, 1]} />
+          <Lightformer form="rect" intensity={0.25} color="#9a9a9a" position={[0, -1, 0]} rotation-x={Math.PI / 2} scale={[6, 6, 1]} />
         </Environment>
         <Desk active={active} onSelect={onSelect} reducedMotion={reducedMotion} />
         <ContactShadows position={[0, 0.0052, 0.05]} scale={[2.4, 1.6]} resolution={1024} blur={2.4} opacity={0.55} far={0.12} color="#23262a" frames={1} />
         <CameraRig progress={progress} reducedMotion={reducedMotion} />
+        {/* After the rig, so it reads this frame's camera. */}
+        <PosterName />
       </Canvas>
     </div>
   )

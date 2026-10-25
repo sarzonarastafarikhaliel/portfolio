@@ -22,6 +22,11 @@ function initialSimple() {
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
 
+// Year shown in the stop stamp: a project's latest year, otherwise this year.
+function stopYear(id: string) {
+  return projects.find((p) => p.id === id)?.period.match(/\d{4}/g)?.at(-1) ?? String(new Date().getFullYear())
+}
+
 export function goTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
 }
@@ -128,6 +133,15 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {/* From the first project on; on the desk stop the name already heads the page. */}
+      {!simple && active > 0 && (
+        <p className="stamp" aria-hidden="true">
+          <span className="stamp-n">{String(active + 1).padStart(2, '0')}</span>
+          <span>{stopYear(stops[active].id)}</span>
+          <span>{stops[active].label}</span>
+        </p>
+      )}
 
       <main>
         <section id="desk" className="stop-section hero">

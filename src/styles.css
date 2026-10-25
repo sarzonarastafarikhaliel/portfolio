@@ -1,16 +1,19 @@
 :root {
-  --felt: #9a9a94;
-  --desk: #4a4f55;
-  --alu: #d9dcdf;
-  --kraft: #c8a77a;
-  --ink: #1d2024;
-  --ink-kraft: #4a3d2c;
-  --tape: #17191c;
-  --tape-ink: #eeeeea;
-  --teal: #1f8a8a;
+  /* Poster palette: black, neutral white, one grey for secondary text, one red. No warm tints. */
+  --black: #0a0a0a;
+  --panel: #111111;
+  --white: #f4f4f4;
+  --muted: #a3a3a3;
+  --line: rgb(244 244 244 / 0.4);
+  --accent: #d0241c;
+  --display: 'Archivo Black', 'Bricolage Grotesque', system-ui, sans-serif;
+  /* Poster cursors: a hairline frame around a red dot; over anything clickable, corner brackets.
+     A dark underlay keeps the white line visible over screenshots and white buttons. */
+  --cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='5.5' y='5.5' width='13' height='13' fill='none' stroke='%230a0a0a' stroke-width='3'/%3E%3Crect x='5.5' y='5.5' width='13' height='13' fill='none' stroke='%23f4f4f4'/%3E%3Crect x='10' y='10' width='4' height='4' fill='%23d0241c'/%3E%3C/svg%3E") 12 12, auto;
+  --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M4 11V4h7M21 4h7v7M28 21v7h-7M11 28H4v-7' fill='none' stroke='%230a0a0a' stroke-width='3.5'/%3E%3Cpath d='M4 11V4h7M21 4h7v7M28 21v7h-7M11 28H4v-7' fill='none' stroke='%23f4f4f4' stroke-width='1.5'/%3E%3Crect x='13' y='13' width='6' height='6' fill='%23d0241c' stroke='%230a0a0a'/%3E%3C/svg%3E") 16 16, pointer;
   --gutter: clamp(1rem, 4.5vw, 4.5rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 *,
@@ -20,31 +23,37 @@
 }
 
 html {
-  background: var(--felt);
-  color: var(--ink);
+  background: var(--black);
+  color: var(--white);
   font-family: 'Bricolage Grotesque', system-ui, sans-serif;
   font-size: 100%;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  cursor: var(--cursor);
   scroll-behavior: smooth;
-  scrollbar-color: var(--desk) var(--felt);
-  caret-color: var(--teal);
+  scrollbar-color: #3a3a3a var(--black);
+  caret-color: var(--accent);
 }
 
 body {
   margin: 0;
-  background: var(--felt);
+  background: var(--black);
 }
 
 ::selection {
-  background: var(--teal);
+  background: var(--accent);
   color: #fff;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
+}
+
+a,
+button {
+  cursor: var(--cursor-pointer);
 }
 
 a {
@@ -71,13 +80,13 @@ p {
   z-index: 0;
 }
 
-/* Soft falloff at the frame edges, like a desk lit from one window. */
+/* Falloff at the frame edges, like a desk lit by one lamp at night. */
 .scene::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(120% 90% at 40% 45%, transparent 55%, rgb(28 30 33 / 0.32));
+  background: radial-gradient(120% 90% at 40% 45%, transparent 50%, rgb(0 0 0 / 0.55));
 }
 
 /* ---------- Bar and stop rail ---------- */
@@ -91,8 +100,8 @@ p {
   gap: 1.5rem;
   padding: 1.1rem var(--gutter) 1.75rem;
   pointer-events: none;
-  /* Felt-toned shade so sheets scrolling underneath never collide with the bar. */
-  background: linear-gradient(to bottom, rgb(163 163 158 / 0.97) 58%, rgb(163 163 158 / 0));
+  /* Black shade so sheets scrolling underneath never collide with the bar. */
+  background: linear-gradient(to bottom, rgb(10 10 10 / 0.92) 58%, rgb(10 10 10 / 0));
 }
 
 .bar > * {
@@ -112,7 +121,7 @@ p {
   gap: 0.375rem;
 }
 
-/* Label tape: the one control vocabulary. Inactive is dark tape; current is inverted aluminium tape. */
+/* Hairline boxes, the poster's framing line: the one control vocabulary. Current is solid white. */
 .stop,
 .link,
 .tags li {
@@ -120,14 +129,14 @@ p {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--tape-ink);
-  background: var(--tape);
+  color: var(--white);
+  background: transparent;
   border: 0;
-  border-radius: 3px;
+  border-radius: 0;
   padding: 0.5rem 0.65rem;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 1px 2px rgb(0 0 0 / 0.3);
-  cursor: pointer;
-  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), background-color 0.25s var(--ease-out);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: var(--cursor-pointer);
+  transition: box-shadow 0.25s var(--ease-out), background-color 0.25s var(--ease-out);
 }
 
 .stop-n {
@@ -137,15 +146,38 @@ p {
 
 .stop:hover,
 .link:hover {
-  transform: translateY(-1px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 4px 10px rgb(0 0 0 / 0.3);
+  box-shadow: inset 0 0 0 1px var(--white);
 }
 
 .stop[aria-current='true'] {
-  background: var(--alu);
-  color: var(--ink);
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), 0 5px 12px rgb(0 0 0 / 0.28);
+  background: var(--white);
+  color: var(--black);
+  box-shadow: none;
+}
+
+.stop[aria-current='true'] .stop-n {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* Poster date stack, bottom left: the stop number in red over its year and name. */
+.stamp {
+  position: fixed;
+  left: var(--gutter);
+  bottom: clamp(1.25rem, 4vh, 2.5rem);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font: 400 clamp(2.25rem, 4.8vw, 4.5rem) / 0.9 var(--display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.stamp-n {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Sections ---------- */
@@ -166,18 +198,26 @@ p {
   pointer-events: auto;
 }
 
-/* Hero: set straight on the felt, top-left, where the desk is empty. */
+/* Hero: the copy sits under the poster name, which the scene draws (its height arrives as --name-h). */
 .hero {
   grid-template-columns: minmax(0, 36rem) 1fr;
   align-items: start;
-  padding-top: max(7.5rem, 16vh);
+  padding-top: calc(76px + var(--name-h, 0px) + 2rem);
 }
 
 h1 {
-  font-size: clamp(2.75rem, 5.6vw, 5.5rem);
-  font-weight: 700;
-  line-height: 0.94;
-  letter-spacing: -0.035em;
+  font: 400 clamp(2.75rem, 7vw, 6.5rem) / 0.9 var(--display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+/* Desk view: the scene shows the name, so the heading stays for screen readers only. */
+html:not(.simple) h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .roles {
@@ -211,22 +251,20 @@ h1 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--tape-ink);
-  background: var(--tape);
-  border-radius: 3px;
+  color: var(--black);
+  background: var(--white);
   padding: 0.85rem 1.2rem;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 2px 4px rgb(0 0 0 / 0.25);
-  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+  transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 8px 16px rgb(0 0 0 / 0.28);
+  background: var(--accent);
+  color: var(--white);
 }
 
 .btn-quiet {
   background: none;
-  color: var(--ink);
+  color: inherit;
   box-shadow: none;
   padding-inline: 0;
   text-decoration: underline;
@@ -234,35 +272,34 @@ h1 {
 }
 
 .btn-quiet:hover {
-  box-shadow: none;
-  text-decoration-color: var(--teal);
+  background: none;
+  color: inherit;
+  text-decoration-color: var(--accent);
 }
 
 .hint {
   margin-top: 1.5rem;
   font-size: 0.875rem;
-  color: #2c3034;
+  color: var(--muted);
 }
 
-/* Kraft sheet laid on the felt. */
+/* Reading panel: black, framed with the poster's hairline. */
 .sheet + .sheet {
   margin-top: 4rem;
 }
 
 .sheet {
   grid-column: 2;
-  background-color: var(--kraft);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .22 0 0 0 0 .12 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  border-radius: 2px;
+  color: var(--white);
+  background: var(--panel);
   padding: clamp(1.5rem, 3vw, 2.75rem);
-  box-shadow: 0 1px 1px rgb(30 24 16 / 0.2), 0 14px 30px -10px rgb(20 22 25 / 0.5);
+  box-shadow: inset 0 0 0 1px var(--line), 0 20px 40px -12px rgb(0 0 0 / 0.7);
 }
 
 .sheet h2 {
-  font-size: clamp(2rem, 3.4vw, 3rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font: 400 clamp(2rem, 3.4vw, 3rem) / 0.95 var(--display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
 }
 
 .sheet h3 {
@@ -280,7 +317,7 @@ h1 {
 .meta {
   margin-top: 0.35rem;
   font-size: 0.875rem;
-  color: var(--ink-kraft);
+  color: var(--muted);
 }
 
 .points {
@@ -293,7 +330,7 @@ h1 {
 }
 
 .points li::marker {
-  color: var(--ink-kraft);
+  color: var(--muted);
 }
 
 .entry + .entry,
@@ -315,7 +352,7 @@ h1 {
 }
 
 .tags li {
-  cursor: default;
+  cursor: var(--cursor);
   font-size: 0.6875rem;
   padding: 0.4rem 0.55rem;
 }
@@ -342,10 +379,10 @@ h1 {
 .steps li::marker {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-kraft);
+  color: var(--muted);
 }
 
-/* App screenshots, printed and laid on the kraft sheet. */
+/* App screenshots, framed on the panel. */
 .shots {
   display: grid;
   gap: 1.5rem;
@@ -367,13 +404,13 @@ h1 {
   height: auto;
   background: #f2f2f2;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px rgb(74 61 44 / 0.25), 0 6px 14px -6px rgb(30 24 16 / 0.45);
+  box-shadow: 0 0 0 1px var(--line);
   transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
 }
 
 .shots a:hover img {
   transform: translateY(-2px);
-  box-shadow: 0 0 0 1px rgb(74 61 44 / 0.3), 0 12px 22px -8px rgb(30 24 16 / 0.5);
+  box-shadow: 0 0 0 1px var(--white);
 }
 
 .shots .portrait {
@@ -387,7 +424,7 @@ h1 {
 .shots figcaption {
   margin-top: 0.5rem;
   font-size: 0.875rem;
-  color: var(--ink-kraft);
+  color: var(--muted);
 }
 
 .project .tags {
@@ -418,7 +455,7 @@ h1 {
   margin-top: 0.6rem;
 }
 
-/* Core skills are the dark tapes above; the rest is quieter text. */
+/* Core skills are the framed tags above; the rest is quieter text. */
 .skills .tags li {
   font-size: 0.8125rem;
   padding: 0.5rem 0.7rem;
@@ -427,12 +464,12 @@ h1 {
 .skills .more {
   margin-top: 0.7rem;
   font-size: 0.9375rem;
-  color: var(--ink-kraft);
+  color: var(--muted);
 }
 
 .skills .more span {
   font-weight: 600;
-  color: var(--ink);
+  color: var(--white);
 }
 
 .contact {
@@ -448,7 +485,7 @@ h1 {
 }
 
 .contact a:hover {
-  text-decoration-color: var(--teal);
+  text-decoration-color: var(--accent);
   text-decoration-thickness: 2px;
 }
 
@@ -465,7 +502,7 @@ html:not(.simple) .figures {
   clip-path: inset(50%);
 }
 
-/* The sheet settles onto the felt as it scrolls in. */
+/* The panel settles into place as it scrolls in. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     html:not(.simple) .sheet {
@@ -479,7 +516,7 @@ html:not(.simple) .figures {
 @keyframes lay-down {
   from {
     transform: translateY(4rem) rotate(-2.2deg) scale(1.015);
-    box-shadow: 0 1px 1px rgb(30 24 16 / 0.1), 0 40px 60px -16px rgb(20 22 25 / 0.45);
+    box-shadow: inset 0 0 0 1px var(--line), 0 40px 60px -16px rgb(0 0 0 / 0.8);
   }
 }
 
@@ -497,19 +534,24 @@ html:not(.simple) .figures {
 /* ---------- Portrait / phones ---------- */
 
 @media (max-width: 760px), (orientation: portrait) and (max-width: 1024px) {
-  /* Jump navigation stays on phones: a scrollable strip of tapes along the bottom edge. */
+  /* Jump navigation stays on phones: a scrollable strip of framed stops along the bottom edge. */
   .rail {
     position: fixed;
     inset: auto 0 0;
     padding: 0.75rem var(--gutter) max(0.75rem, env(safe-area-inset-bottom));
     overflow-x: auto;
     scrollbar-width: none;
-    background: var(--felt);
-    box-shadow: 0 -1px 0 rgb(29 32 36 / 0.12), 0 -8px 18px -10px rgb(29 32 36 / 0.35);
+    background: var(--black);
+    box-shadow: 0 -1px 0 rgb(244 244 244 / 0.12);
   }
 
   .stop {
     flex: none;
+  }
+
+  /* The rail owns the bottom edge here. */
+  .stamp {
+    display: none;
   }
 
   .hint {
@@ -538,11 +580,11 @@ html:not(.simple) .figures {
 
   .hero {
     grid-template-columns: minmax(0, 1fr);
-    padding-top: 5.5rem;
+    padding-top: calc(76px + var(--name-h, 0px) + 1.25rem);
   }
 
   h1 {
-    font-size: clamp(2.5rem, 11vw, 4rem);
+    font-size: clamp(2.5rem, 13vw, 4rem);
   }
 }
 

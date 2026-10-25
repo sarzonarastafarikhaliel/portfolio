@@ -6,7 +6,8 @@ An interactive portfolio set on a 3D desk. Each object on the desk is a project 
 
 ## Features
 
-- A felt desk scene built with Three.js through React Three Fiber, with real-time soft shadows and procedural materials (felt, kraft paper, brushed aluminium).
+- A night desk scene built with Three.js through React Three Fiber, lit by a single lamp, with real-time soft shadows and procedural materials (felt, card, brushed aluminium).
+- A poster-style hero: the name in large display type that the desk objects stand in front of, a black, white and red palette, and a custom cursor.
 - A scroll-driven camera tour with numbered stops, plus click-to-jump on every desk object.
 - A voxel "Thinker" figurine that assembles itself cube by cube when the page loads.
 - A **Simple view** with the same content as a plain page. It switches on automatically when the browser has no WebGL support, and the camera skips its animations when the visitor has reduced motion turned on.
@@ -24,7 +25,7 @@ An interactive portfolio set on a 3D desk. Each object on the desk is a project 
 
 - [Vite](https://vitejs.dev/) + [React](https://react.dev/) + TypeScript
 - [Three.js](https://threejs.org/) with [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber) and [@react-three/drei](https://github.com/pmndrs/drei)
-- Plain CSS, with [Bricolage Grotesque](https://fonts.google.com/specimen/Bricolage+Grotesque) self-hosted through Fontsource
+- Plain CSS, with [Bricolage Grotesque](https://fonts.google.com/specimen/Bricolage+Grotesque) and [Archivo Black](https://fonts.google.com/specimen/Archivo+Black) self-hosted through Fontsource
 - Deployed on [Vercel](https://vercel.com/) as a static site
 
 ## Run it locally

@@ -4,6 +4,7 @@ import '@fontsource/bricolage-grotesque/400.css'
 import '@fontsource/bricolage-grotesque/500.css'
 import '@fontsource/bricolage-grotesque/600.css'
 import '@fontsource/bricolage-grotesque/700.css'
+import '@fontsource/archivo-black/400.css'
 import './styles.css'
 import App from './App'
 
